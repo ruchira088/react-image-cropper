@@ -37,7 +37,8 @@ export default React.createClass(
     },
     handleMouseMove({nativeEvent})
     {
-      const {completed, moving, active, startingPoint: {x, y}} = this.state
+      const {completed, moving, active, startingPoint: {x, y}, dimensions} = this.state
+      const {onAreaSelected} = this.props
       const {layerX: x1, layerY: y1} = nativeEvent
 
       if (active)
@@ -60,11 +61,15 @@ export default React.createClass(
           const dx = x1 - x0
           const dy = y1 - y0
 
+          const startingPoint = {x: x+dx, y: y+dy}
+
           this.setState(
             {
-              movingPoint: {x: x1, y: y1},
-              startingPoint: {x: x+dx, y: y+dy}
+              startingPoint,
+              movingPoint: {x: x1, y: y1}
             })
+
+          onAreaSelected({dimensions, startingPoint})
         }
         else
         {
@@ -84,7 +89,6 @@ export default React.createClass(
       }
       else if (moving)
       {
-        onAreaSelected({startingPoint, dimensions})
         this.setState({moving: false, movingPoint: null})
       }
     },
