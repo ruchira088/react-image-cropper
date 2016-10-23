@@ -95,15 +95,13 @@ export default React.createClass(
     render()
     {
       const {width, height} = this.props
-      const {startingPoint, dimensions, moving, active} = this.state
+      const {startingPoint, dimensions, moving, active, completed} = this.state
 
       const styles = {
         width,
         height,
         position: "absolute",
-        cursor: moving ? "move" : "crosshair",
-        // TODO Modify this later
-        backgroundColor: "rgb(100, 100, 100)",
+        cursor: completed ? (moving ? "move" : "default") : "crosshair",
         opacity: "0.5"
       }
 
@@ -114,6 +112,7 @@ export default React.createClass(
              onMouseUp={this.handleMouseUp}>
           <CroppingArea
             origin={startingPoint}
+            canvasDimensions={{width, height}}
             pointerEvents={!(moving || active)}
             dimensions={dimensions}
             onMoveStart={() => this.setState({moving: true})}/>
