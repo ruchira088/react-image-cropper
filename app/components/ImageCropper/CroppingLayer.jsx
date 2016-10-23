@@ -1,14 +1,16 @@
 import React from "react"
+import CroppingArea from "./CroppingArea.jsx"
 
 export default React.createClass(
   {
     getInitialState()
     {
       return {
-        startPoint: {
+        startingPoint: {
           x: 0, y: 0
         },
         active: false,
+        completed: false,
         dimensions: {
           width: 0, height: 0
         }
@@ -16,20 +18,25 @@ export default React.createClass(
     },
     handleMouseDown({nativeEvent})
     {
-      const {layerX: x, layerY: y} = nativeEvent
+      const {completed} = this.state
 
-      this.setState({
-        startPoint: {x, y},
-        active: true,
-        dimensions: {
-          width: 0,
-          height: 0
-        }
-      })
+      if (!completed)
+      {
+        const {layerX: x, layerY: y} = nativeEvent
+
+        this.setState({
+          startingPoint: {x, y},
+          active: true,
+          dimensions: {
+            width: 0,
+            height: 0
+          }
+        })
+      }
     },
     handleMouseMove({nativeEvent})
     {
-      const {active, startPoint: {x, y}} = this.state
+      const {completed, active, startingPoint: {x, y}} = this.state
 
       if (active)
       {
@@ -43,36 +50,38 @@ export default React.createClass(
             }
           })
       }
+      else if (completed)
+      {
+
+      }
     },
     handleMouseUp()
     {
-      const {startPoint, dimensions} = this.state
+      const {startingPoint, dimensions, completed} = this.state
       const {onAreaSelected} = this.props
 
-      onAreaSelected({startPoint, dimensions})
-      this.setState({active: false})
+      if(!completed)
+      {
+        onAreaSelected({startingPoint, dimensions})
+        this.setState({active: false, completed: true})
+      } else
+      {
+
+      }
     },
     render()
     {
       const {width, height} = this.props
-      const {startPoint: {x, y}, dimensions} = this.state
+      const {startingPoint, dimensions} = this.state
 
       const styles = {
         width,
         height,
         position: "absolute",
+        cursor: "crosshair",
         // TODO Modify this later
         backgroundColor: "rgb(100, 100, 100)",
         opacity: "0.5"
-      }
-
-      const croppingAreaStyles = {
-        position: "absolute",
-        top: `${y}px`,
-        left: `${x}px`,
-        width: `${dimensions.width}px`,
-        height: `${dimensions.height}px`,
-        backgroundColor: "red"
       }
 
       return (
@@ -80,9 +89,7 @@ export default React.createClass(
              onMouseDown={this.handleMouseDown}
              onMouseMove={this.handleMouseMove}
              onMouseUp={this.handleMouseUp}>
-          <div className="cropping-area" style={croppingAreaStyles}>
-
-          </div>
+          <CroppingArea origin={startingPoint} dimensions={dimensions}/>
         </div>
       )
     }

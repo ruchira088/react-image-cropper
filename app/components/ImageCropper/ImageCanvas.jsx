@@ -56,7 +56,7 @@ export default React.createClass(
         outputCanvas.getContext("2d").drawImage(imageBitmap, 0, 0)
       }
     },
-    handleOnAreaSelected({startPoint: {x, y}, dimensions: {height, width}})
+    handleOnAreaSelected({startingPoint: {x, y}, dimensions: {height, width}})
     {
       const {canvas} = this
       const context = canvas.getContext("2d")
