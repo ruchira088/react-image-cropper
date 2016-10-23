@@ -11,6 +11,7 @@ export default React.createClass(
         },
         active: false,
         completed: false,
+        moving: false,
         dimensions: {
           width: 0, height: 0
         }
@@ -36,12 +37,11 @@ export default React.createClass(
     },
     handleMouseMove({nativeEvent})
     {
-      const {completed, active, startingPoint: {x, y}} = this.state
+      const {completed, moving, active, startingPoint: {x, y}} = this.state
+      const {layerX: x1, layerY: y1} = nativeEvent
 
       if (active)
       {
-        const {layerX: x1, layerY: y1} = nativeEvent
-
         this.setState(
           {
             dimensions: {
@@ -50,35 +50,54 @@ export default React.createClass(
             }
           })
       }
-      else if (completed)
+      else if (completed && moving)
       {
+        const {movingPoint} = this.state
 
+        if(movingPoint)
+        {
+          const {x: x0, y: y0} = movingPoint
+          const dx = x1 - x0
+          const dy = y1 - y0
+
+          this.setState(
+            {
+              movingPoint: {x: x1, y: y1},
+              startingPoint: {x: x+dx, y: y+dy}
+            })
+        }
+        else
+        {
+          this.setState({movingPoint: {x: x1, y: y1}})
+        }
       }
     },
     handleMouseUp()
     {
-      const {startingPoint, dimensions, completed} = this.state
+      const {moving, startingPoint, dimensions, completed} = this.state
       const {onAreaSelected} = this.props
 
       if(!completed)
       {
         onAreaSelected({startingPoint, dimensions})
         this.setState({active: false, completed: true})
-      } else
+      }
+      else if (moving)
       {
-
+        onAreaSelected({startingPoint, dimensions})
+        this.setState({moving: false, movingPoint: null})
       }
     },
     render()
     {
       const {width, height} = this.props
-      const {startingPoint, dimensions} = this.state
+      const {startingPoint, dimensions, moving, active} = this.state
 
       const styles = {
         width,
         height,
         position: "absolute",
-        cursor: "crosshair",
+        cursor: moving ? "move" : "crosshair",
         // TODO Modify this later
         backgroundColor: "rgb(100, 100, 100)",
         opacity: "0.5"
@@ -89,7 +108,11 @@ export default React.createClass(
              onMouseDown={this.handleMouseDown}
              onMouseMove={this.handleMouseMove}
              onMouseUp={this.handleMouseUp}>
-          <CroppingArea origin={startingPoint} dimensions={dimensions}/>
+          <CroppingArea
+            origin={startingPoint}
+            pointerEvents={!(moving || active)}
+            dimensions={dimensions}
+            onMoveStart={() => this.setState({moving: true})}/>
         </div>
       )
     }
